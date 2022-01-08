@@ -1,5 +1,5 @@
 module.exports = {
-    type: 'mysql',
+    type: 'mariadb',
     host: process.env.MYSQL_HOST,
     port: process.env.MYSQL_PORT,
     username: process.env.MYSQL_USERNAME,
