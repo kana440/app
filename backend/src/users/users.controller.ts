@@ -1,5 +1,5 @@
-import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, Post, ValidationPipe } from '@nestjs/common';
+import { ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { SignUpUserDto } from './dto/sign-up-user.dto';
 import { UsersService } from './users.service';
 import {
@@ -8,14 +8,15 @@ import {
     ApiCreatedResponse,
     ApiInternalServerErrorResponse,
   } from '@nestjs/swagger';
+import { SignInUserDto } from './dto/sign-in-user.dto';
   
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-    constructor(private userService: UsersService) {}
+    constructor(private usersService: UsersService) {}
 
-    @Post()
+    @Post('sign_up')
     @ApiCreatedResponse({
         description: 'ユーザー登録完了',
     })
@@ -30,6 +31,22 @@ export class UsersController {
     })
     async signUp(@Body(ValidationPipe) signUpUserDto: SignUpUserDto,
     ): Promise<void>{
-        await this.userService.createUser(signUpUserDto);
+        await this.usersService.createUser(signUpUserDto);
     }
+
+    @Post('sign_in')
+    @HttpCode(200)
+    @ApiOkResponse({
+        type: String,
+        description: 'ユーザーログイン完了',
+    })
+    @ApiUnauthorizedResponse({
+        description:
+        'メールアドレスまたはパスワードが異なることによるログインエラー',
+    })
+    async signIn(
+        @Body(ValidationPipe) signInUserDto: SignInUserDto,
+    ): Promise<string> {
+    return await this.usersService.signIn(signInUserDto);
+  }
 }

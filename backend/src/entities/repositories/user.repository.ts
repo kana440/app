@@ -1,7 +1,9 @@
-import { ConflictException, InternalServerErrorException } from "@nestjs/common";
+import { ConflictException, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import { User } from "src/entities/user.entity";
 import { SignUpUserDto } from "src/users/dto/sign-up-user.dto";
 import { EntityRepository, Repository } from "typeorm";
+import * as bcrypt from 'bcrypt'
+import { SignInUserDto } from "src/users/dto/sign-in-user.dto";
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -19,5 +21,13 @@ export class UserRepository extends Repository<User> {
             }
             throw new InternalServerErrorException();
         }
+    }
+
+    async validatePassword({email, password}: SignInUserDto) {
+        const user = await this.findOne({ email });
+        if(user && (await bcrypt.compare(password, user.password))) {
+            return user.email;
+        }
+        throw new UnauthorizedException('メールアドレスまたはパスワードが違います');
     }
 }
